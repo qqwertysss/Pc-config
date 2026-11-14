@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PC CONFIG — Каталог комплектующих</title>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #080d18;
+  color: #eef4ff;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 22px 8%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1c2b43;
+}
+
+.logo { font-size: 25px; font-weight: bold; }
+.logo span { color: #168cff; }
+
+nav a {
+  color: #b7c6dc;
+  text-decoration: none;
+  margin-left: 20px;
+}
+
+.hero {
+  padding: 75px 8%;
+  text-align: center;
+  background: radial-gradient(ellipse, #102d52, #080d18 70%);
+}
+
+.hero h1 { font-size: 40px; margin-bottom: 18px; }
+.hero h1 span { color: #168cff; }
+.hero p { color: #9cabc0; margin-bottom: 25px; }
+
+button, select, input {
+  font-family: inherit;
+  font-size: 15px;
+}
+
+button {
+  background: #087cff;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover { background: #0065d8; }
+
+section { padding: 50px 8%; }
+h2 { margin-bottom: 25px; }
+
+.search-sort {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+input, select {
+  background: #101b2d;
+  color: white;
+  border: 1px solid #29415f;
+  border-radius: 8px;
+  padding: 13px;
+  outline: none;
+}
+
+input { flex: 1; min-width: 0; }
+select { max-width: 220px; }
+
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+
+.filters button { background: #15243a; }
+.filters button.active { background: #087cff; }
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: #101b2d;
+  border: 1px solid #203653;
+  border-radius: 12px;
+  padding: 22px;
+  transition: .2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: #168cff;
+}
+
+.emoji { font-size: 42px; margin-bottom: 15px; }
+.card p { color: #9cabc0; margin-top: 10px; }
+.price { color: #36a1ff; font-size: 21px; font-weight: bold; margin: 17px 0; }
+.card button { width: 100%; }
+
+#resultCount {
+  color: #9cabc0;
+  margin-bottom: 18px;
+}
+
+.empty {
+  color: #9cabc0;
+  padding: 25px 0;
+  grid-column: 1 / -1;
+}
+
+footer {
+  text-align: center;
+  padding: 25px;
+  color: #71839e;
+  border-top: 1px solid #1c2b43;
+}
+
+/* Окно характеристик */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #000b;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 10;
+}
+
+.modal.show { display: flex; }
+
+.modal-content {
+  background: #101b2d;
+  border: 1px solid #168cff;
+  border-radius: 14px;
+  padding: 25px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.modal-content h2 { margin-bottom: 15px; }
+.modal-content p { color: #b7c6dc; line-height: 1.7; }
+.close { margin-top: 20px; width: 100%; }
+
+@media(max-width: 600px) {
+  header { flex-direction: column; gap: 15px; }
+  nav a { margin: 0 8px; }
+  .hero h1 { font-size: 30px; }
+  .search-sort { flex-direction: column; }
+  select { max-width: none; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">PC <span>CONFIG</span></div>
+  <nav>
+    <a href="#home">Главная</a>
+    <a href="#products">Каталог</a>
+  </nav>
+</header>
+
+<div class="hero" id="home">
+  <h1>Собери свой <span>идеальный ПК</span></h1>
+  <p>Изучай комплектующие и выбирай оборудование для своего компьютера.</p>
+  <button onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">
+    Смотреть каталог
+  </button>
+</div>
+
+<section id="products">
+  <h2>Каталог комплектующих</h2>
+
+  <div class="search-sort">
+    <input id="search" type="search" placeholder="Поиск комплектующих...">
+    <select id="sort">
+      <option value="default">Без сортировки</option>
+      <option value="asc">Сначала дешевле</option>
+      <option value="desc">Сначала дороже</option>
+    </select>
+  </div>
+
+  <div class="filters">
+    <button class="active" data-filter="all">Все</button>
+    <button data-filter="cpu">Процессоры</button>
+    <button data-filter="gpu">Видеокарты</button>
+    <button data-filter="ram">Оперативная память</button>
+  </div>
+
+  <p id="resultCount"></p>
+  <div class="products" id="productsList"></div>
+</section>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle"></h2>
+    <p id="modalInfo"></p>
+    <button class="close" onclick="closeModal()">Закрыть</button>
+  </div>
+</div>
+
+<footer>
+  PC CONFIG © 2026 — Учебный проект
+</footer>
+
+<script>
+const items = [
+  {
+    name: "AMD Ryzen 5 5600",
+    type: "cpu",
+    emoji: "🧠",
+    price: 8500,
+    specs: "6 ядер, 12 потоков. Сокет AM4. Архитектура Zen 3."
+  },
+  {
+    name: "Intel Core i5-12400F",
+    type: "cpu",
+    emoji: "⚙️",
+    price: 11000,
+    specs: "6 ядер, 12 потоков. Сокет LGA1700. Нет встроенной графики."
+  },
+  {
+    name: "GeForce RTX 3060",
+    type: "gpu",
+    emoji: "🎮",
+    price: 25000,
+    specs: "12 GB GDDR6. Шина памяти 192 бит."
+  },
+  {
+    name: "Radeon RX 6600",
+    type: "gpu",
+    emoji: "🚀",
+    price: 19000,
+    specs: "8 GB GDDR6. Шина памяти 128 бит."
+  },
+  {
+    name: "DDR4 16 GB",
+    type: "ram",
+    emoji: "💾",
+    price: 3500,
+    specs: "Объём 16 GB. Частота 3200 MHz."
+  },
+  {
+    name: "DDR5 32 GB",
+    type: "ram",
+    emoji: "💿",
+    price: 8500,
+    specs: "Объём 32 GB. Частота 6000 MHz."
+  }
+];
+
+let activeFilter = "all";
+
+const list = document.getElementById("productsList");
+const search = document.getElementById("search");
+const sort = document.getElementById("sort");
+
+function render() {
+  let result = items.filter(item => {
+    const matchesType =
+      activeFilter === "all" || item.type === activeFilter;
+
+    const matchesSearch =
+      item.name.toLowerCase().includes(search.value.toLowerCase());
+
+    return matchesType && matchesSearch;
+  });
+
+  if (sort.value === "asc") {
+    result.sort((a, b) => a.price - b.price);
+  }
+
+  if (sort.value === "desc") {
+    result.sort((a, b) => b.price - a.price);
+  }
+
+  document.getElementById("resultCount").textContent =
+    "Найдено комплектующих: " + result.length;
+
+  list.innerHTML = "";
+
+  if (result.length === 0) {
+    list.innerHTML = '<p class="empty">Ничего не найдено.</p>';
+    return;
+  }
+
+  result.forEach(item => {
+    const index = items.indexOf(item);
+
+    list.innerHTML += `
+      <div class="card">
+        <div class="emoji">${item.emoji}</div>
+        <h3>${item.name}</h3>
+        <p>${item.type === "cpu" ? "Процессор" :
+             item.type === "gpu" ? "Видеокарта" :
+             "Оперативная память"}</p>
+        <div class="price">${item.price.toLocaleString("ru-RU")} ₽</div>
+        <button onclick="showDetails(${index})">Подробнее</button>
+      </div>
+    `;
+  });
+}
+
+document.querySelectorAll(".filters button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".filters button")
+      .forEach(b => b.classList.remove("active"));
+
+    button.classList.add("active");
+    activeFilter = button.dataset.filter;
+    render();
+  });
+});
+
+search.addEventListener("input", render);
+sort.addEventListener("change", render);
+
+function showDetails(index) {
+  const item = items[index];
+
+  document.getElementById("modalTitle").textContent = item.name;
+  document.getElementById("modalInfo").textContent =
+    item.specs + " Демонстрационная цена: " +
+    item.price.toLocaleString("ru-RU") + " ₽.";
+
+  document.getElementById("modal").classList.add("show");
+}
+
+function closeModal() {
+  document.getElementById("modal").classList.remove("show");
+}
+
+document.getElementById("modal").addEventListener("click", event => {
+  if (event.target.id === "modal") closeModal();
+});
+
+render();
+</script>
+
+</body>
+</html>
